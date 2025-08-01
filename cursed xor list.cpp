@@ -11,12 +11,9 @@ template <class T>
 struct N
 {
     using U = uintptr_t;
-
     T d;
     N *b;
-
     N(T v) : d(v), b(0) {}
-
     void k(N *f)
     {
         if ((N *)((U)f ^ (U)b))
@@ -30,9 +27,7 @@ struct L
 {
     using N = N<T>;
     using U = uintptr_t;
-
     N *c, *p;
-
     L(T v) : c(new N(v)), p(0) {}
 
     ~L()
@@ -48,24 +43,20 @@ struct L
 
     void r()
     {
-        if (c && (N *)((U)p ^ (U)c->b))
-        {
-            c = (N *)((U)p ^ (U)c->b);
-            p = (N *)((U)c ^ (U)p);
-            c = (N *)((U)p ^ (U)c);
-            p = (N *)((U)c ^ (U)p);
-        }
+        if (!c)
+            return;
+        p = (N *)((U)p ^ (U)c->b ^ (U)c);
+        c = (N *)((U)p ^ (U)c);
+        p = (N *)((U)p ^ (U)c);
     }
 
     void l()
     {
-        if (p)
-        {
-            p = (N *)((U)p->b ^ (U)c);
-            c = (N *)((U)c ^ (U)p);
-            p = (N *)((U)p ^ (U)c);
-            c = (N *)((U)c ^ (U)p);
-        }
+        if (!p)
+            return;
+        c = (N *)((U)c ^ (U)p->b ^ (U)p);
+        p = (N *)((U)p ^ (U)c);
+        c = (N *)((U)p ^ (U)c);
     }
 
     void i(T v)
@@ -73,13 +64,10 @@ struct L
         if (!c)
             return;
         N *n = new N(v);
-
         n->b = (N *)((U)c ^ (U)p ^ (U)c->b);
-
         if ((N *)((U)p ^ (U)c->b))
-            ((N *)((U)p ^ (U)c->b))->b = (N *)((U)n ^ (U)c ^ (U)((N *)((U)p ^ (U)c->b))->b);
-
-        c->b = (N *)((U)p ^ (U)n);
+            ((N *)((U)p ^ (U)c->b))->b = (N *)((U)((N *)((U)p ^ (U)c->b))->b ^ (U)c ^ (U)n);
+        c->b = (N *)((U)c->b ^ (U)((U)p ^ (U)c->b) ^ (U)n);
     }
 
     void rm()
@@ -87,23 +75,16 @@ struct L
         if (!c)
             return;
         N *t = c;
-
+        if ((N *)((U)p ^ (U)t->b))
+            ((N *)((U)p ^ (U)t->b))->b = (N *)((U)((N *)((U)p ^ (U)t->b))->b ^ (U)t ^ (U)p);
         if (p)
         {
-            if ((N *)((U)p ^ (U)t->b))
-                ((N *)((U)p ^ (U)t->b))->b = (N *)((U)p ^ (U)((N *)((U)p ^ (U)t->b))->b ^ (U)t);
-
-            p->b = (N *)((U)p->b ^ (U)t ^ (U)p ^ (U)t->b);
+            p->b = (N *)((U)p->b ^ (U)t ^ (U)((U)p ^ (U)t->b));
             c = p;
-            p = (N *)((U)p->b ^ (U)p ^ (U)t->b);
+            p = (N *)((U)p->b ^ (U)((U)c ^ (U)t->b));
         }
         else
-        {
             c = (N *)((U)p ^ (U)t->b);
-            if (c)
-                c->b = (N *)((U)c->b ^ (U)t);
-        }
-
         delete t;
     }
 
@@ -113,6 +94,7 @@ struct L
     }
 };
 
-int main() {
-    // TODO - debug
+int main()
+{
+
 }
